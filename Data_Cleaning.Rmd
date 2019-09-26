@@ -1,0 +1,240 @@
+---
+title: "Tesi laurea magistrale - Data cleaning"
+author: "Edoardo Busetti"
+date: "Dicembre 2, 2019"
+output:
+  html_document:
+    toc: true # table of content true
+    toc_depth: 3  # upto three depths of headings (specified by #, ## and ###)
+    number_sections: False  # if you want number sections at each table header
+  pdf_document: default
+---
+
+## Introduzione
+In questo file importo i dati presi da https://www.kaggle.com/c/home-credit-default-risk/data e faccio data wrangling.
+```{r}
+library(dplyr)
+```
+
+
+
+## Ridurre il dataset campionando casualmente.
+```{r}
+rm(list = ls())
+Dataset_Train = read.csv("application_train.csv",header = TRUE)
+```
+
+```{r}
+set.seed(1)
+Dataset_Train_reduced = Dataset_Train[sample(nrow(Dataset_Train), 50000), ]
+```
+
+
+## Dare alle colonne etichette più chiare
+```{r}
+# names(Dataset_Train_reduced)
+Dataset_Train_reduced =  rename(Dataset_Train_reduced,
+                                ClientID = SK_ID_CURR,
+                                TargetVariable = TARGET,
+                                ContractType = NAME_CONTRACT_TYPE,
+                                Gender = CODE_GENDER,
+                                OwnsCar = FLAG_OWN_CAR,
+                                OwnsHouse = FLAG_OWN_REALTY,
+                                NumChildren = CNT_CHILDREN,
+                                Income = AMT_INCOME_TOTAL,
+                                LoanAmmount = AMT_CREDIT,
+                                LoanAnnuity = AMT_ANNUITY,
+                                PriceOfItem = AMT_GOODS_PRICE,
+                                WhoWasAccompanying=NAME_TYPE_SUITE,
+                                IncomeType = NAME_INCOME_TYPE,
+                                HighestEducation = NAME_EDUCATION_TYPE,
+                                FamilyStatus = NAME_FAMILY_STATUS,
+                                HousingSituation = NAME_HOUSING_TYPE,
+                                NormalizedRegionPopulation = REGION_POPULATION_RELATIVE,
+                                DaysSinceBirth = DAYS_BIRTH,
+                                DaysOfCurrentJob = DAYS_EMPLOYED,
+                                DaysSinceChangeRegistration = DAYS_REGISTRATION,
+                                DaysSinceIDChange = DAYS_ID_PUBLISH,
+                                AgeOfCar = OWN_CAR_AGE,
+                                MobilePhone_Flag = FLAG_MOBIL,
+                                WorkPhone_Flag = FLAG_WORK_PHONE,
+                                HomePhone_Flag = FLAG_PHONE,
+                                MobilePhoneReachability_Flag = FLAG_CONT_MOBILE,
+                                Email_Flag = FLAG_EMAIL,
+                                OccupationType = OCCUPATION_TYPE,
+                                NumFamilyMembers = CNT_FAM_MEMBERS,
+                                RegionRating = REGION_RATING_CLIENT,
+                                CityRating = REGION_RATING_CLIENT_W_CITY,
+                                WeekdayOfApplication = WEEKDAY_APPR_PROCESS_START,
+                                HourOfApplication = HOUR_APPR_PROCESS_START,
+                                PermanentAddress_ContactAddress_Match_Region = REG_REGION_NOT_LIVE_REGION,
+                                PermanentAddress_WorkAddress_Match_Region = REG_REGION_NOT_WORK_REGION,
+                                ContactAddress_WorkAddress_Match_Region = LIVE_REGION_NOT_WORK_REGION,
+                                PermanentAddress_ContactAddress_Match_City = REG_CITY_NOT_LIVE_CITY,
+                                PermanentAddress_WorkAddress_Match_City = REG_CITY_NOT_WORK_CITY,
+                                ContactAddress_WorkAddress_Match_City = LIVE_CITY_NOT_WORK_CITY,
+                                WorkOrganizationType = ORGANIZATION_TYPE,
+                                Building_ApartmentSize_Average = APARTMENTS_AVG,
+                                Building_BasementSize_Average = BASEMENTAREA_AVG,
+                                Building_Age = YEARS_BUILD_AVG,
+                                Building_CommonArea_Average = COMMONAREA_AVG,
+                                Building_NumElev = ELEVATORS_AVG,
+                                Building_NumEntraces = ENTRANCES_AVG,
+                                Building_NumFloors = FLOORSMAX_AVG,
+                                Building_NumFloorsUnderground = FLOORSMIN_AVG,
+                                Building_LandArea = LANDAREA_AVG,
+                                Building_LivingApartments = LIVINGAPARTMENTS_AVG,
+                                Building_LivingArea = LIVINGAREA_AVG,
+                                Building_NonLivingApartments = NONLIVINGAPARTMENTS_AVG,
+                                Building_NonLivingArea = NONLIVINGAREA_AVG,
+                                ClientSocialCircle_Num30DaysDeafault = OBS_30_CNT_SOCIAL_CIRCLE,
+                                DaysSinceLastPhoneChange = DAYS_LAST_PHONE_CHANGE,
+                                NumEnquiriesCreditBureau_Hour = AMT_REQ_CREDIT_BUREAU_HOUR,
+                                NumEnquiriesCreditBureau_Day = AMT_REQ_CREDIT_BUREAU_DAY,
+                                NumEnquiriesCreditBureau_Week = AMT_REQ_CREDIT_BUREAU_WEEK,
+                                NumEnquiriesCreditBureau_Month = AMT_REQ_CREDIT_BUREAU_MON,
+                                NumEnquiriesCreditBureau_4Months = AMT_REQ_CREDIT_BUREAU_QRT,
+                                NumEnquiriesCreditBureau_Year = AMT_REQ_CREDIT_BUREAU_YEAR)
+                                
+                                
+                                
+                                
+                                
+
+
+```
+## Rimuovere le colonne superflue
+```{r}
+ColumsToRemove = c("FLAG_EMP_PHONE","EXT_SOURCE_1","EXT_SOURCE_2"
+                  ,"EXT_SOURCE_3","YEARS_BEGINEXPLUATATION_AVG"
+                  ,"YEARS_BUILD_MODE","COMMONAREA_MODE"                             
+                  ,"ELEVATORS_MODE","ENTRANCES_MODE"                              
+                  ,"FLOORSMAX_MODE","FLOORSMIN_MODE"                              
+                  ,"LANDAREA_MODE","LIVINGAPARTMENTS_MODE"                       
+                  ,"LIVINGAREA_MODE","NONLIVINGAPARTMENTS_MODE"                    
+                  ,"NONLIVINGAREA_MODE","APARTMENTS_MEDI"                             
+                  ,"BASEMENTAREA_MEDI","YEARS_BEGINEXPLUATATION_MEDI"                
+                  ,"YEARS_BUILD_MEDI","COMMONAREA_MEDI"                             
+                  ,"ELEVATORS_MEDI","ENTRANCES_MEDI"                              
+                  ,"FLOORSMAX_MEDI","FLOORSMIN_MEDI"                              
+                  ,"LANDAREA_MEDI","LIVINGAPARTMENTS_MEDI"                       
+                  ,"LIVINGAREA_MEDI","NONLIVINGAPARTMENTS_MEDI"                    
+                  ,"NONLIVINGAREA_MEDI","FONDKAPREMONT_MODE"                          
+                  ,"HOUSETYPE_MODE","TOTALAREA_MODE"                              
+                  ,"WALLSMATERIAL_MODE","EMERGENCYSTATE_MODE"
+                  ,"APARTMENTS_MODE","BASEMENTAREA_MODE",
+                  "YEARS_BEGINEXPLUATATION_MODE")
+
+
+
+
+Dataset_Train_reduced[,ColumsToRemove] <- list(NULL) # Dropping the columns
+```
+
+## trasformare le variabili da "int" a "factor", ovvero in variabili categoriche
+
+
+```{r}
+names(Dataset_Train_reduced)
+
+```
+
+
+
+```{r}
+# str(Dataset_Train_reduced)
+
+Dataset_Train_reduced = mutate(Dataset_Train_reduced,ClientID = factor(ClientID),
+                               TargetVariable = factor(TargetVariable),
+                               MobilePhone_Flag = factor(MobilePhone_Flag),
+                               WorkPhone_Flag = factor(WorkPhone_Flag),
+                               MobilePhoneReachability_Flag = factor(MobilePhoneReachability_Flag),
+                               HomePhone_Flag = factor(HomePhone_Flag),
+                               Email_Flag = factor(Email_Flag),
+                               HourOfApplication = factor(HourOfApplication, ordered = TRUE),
+                               PermanentAddress_ContactAddress_Match_Region = factor(PermanentAddress_ContactAddress_Match_Region),
+                               PermanentAddress_WorkAddress_Match_Region = factor(PermanentAddress_WorkAddress_Match_Region),
+                               PermanentAddress_WorkAddress_Match_Region = factor(PermanentAddress_WorkAddress_Match_Region),
+                               ContactAddress_WorkAddress_Match_Region = factor(ContactAddress_WorkAddress_Match_Region),
+                               PermanentAddress_ContactAddress_Match_City = factor(PermanentAddress_ContactAddress_Match_City),
+                               PermanentAddress_WorkAddress_Match_City = factor(PermanentAddress_WorkAddress_Match_City),
+                               ContactAddress_WorkAddress_Match_City = factor(ContactAddress_WorkAddress_Match_City),
+                               FLAG_DOCUMENT_2 = factor(FLAG_DOCUMENT_2),
+                               FLAG_DOCUMENT_3 = factor(FLAG_DOCUMENT_3),
+                               FLAG_DOCUMENT_4 = factor(FLAG_DOCUMENT_4),
+                               FLAG_DOCUMENT_5 = factor(FLAG_DOCUMENT_5),
+                               FLAG_DOCUMENT_6 = factor(FLAG_DOCUMENT_6),
+                               FLAG_DOCUMENT_7 = factor(FLAG_DOCUMENT_7),
+                               FLAG_DOCUMENT_8 = factor(FLAG_DOCUMENT_8),
+                               FLAG_DOCUMENT_9 = factor(FLAG_DOCUMENT_9),
+                               FLAG_DOCUMENT_10 = factor(FLAG_DOCUMENT_10),
+                               FLAG_DOCUMENT_11 = factor(FLAG_DOCUMENT_11),
+                               FLAG_DOCUMENT_12 = factor(FLAG_DOCUMENT_12),
+                               FLAG_DOCUMENT_13 = factor(FLAG_DOCUMENT_13),
+                               FLAG_DOCUMENT_14 = factor(FLAG_DOCUMENT_14),
+                               FLAG_DOCUMENT_15 = factor(FLAG_DOCUMENT_15),
+                               FLAG_DOCUMENT_16 = factor(FLAG_DOCUMENT_16),
+                               FLAG_DOCUMENT_17 = factor(FLAG_DOCUMENT_17),
+                               FLAG_DOCUMENT_18 = factor(FLAG_DOCUMENT_18),
+                               FLAG_DOCUMENT_19 = factor(FLAG_DOCUMENT_19),
+                               FLAG_DOCUMENT_20 = factor(FLAG_DOCUMENT_20),
+                               FLAG_DOCUMENT_21 = factor(FLAG_DOCUMENT_21),
+                               NumFamilyMembers = as.integer(NumFamilyMembers),
+                               DaysSinceChangeRegistration = as.integer(DaysSinceChangeRegistration),
+                               AgeOfCar = as.integer(AgeOfCar)
+                               )
+
+str(Dataset_Train_reduced)
+
+# 
+
+
+```
+
+
+
+
+## Controllare la coerenza dei valori
+```{r}
+sum(Dataset_Train_reduced$DaysSinceBirth >= 0) # Tutti i valori sono negativi
+sum(Dataset_Train_reduced$DaysSinceBirth >= -6570) # Tutti i clienti hanno almeno 18 anni (365*18 giorni)
+sum(Dataset_Train_reduced$DaysSinceBirth < -36500) # Tutti i clienti hanno meno di 100 anni
+Dataset_Train_reduced$DaysSinceBirth = abs(Dataset_Train_reduced$DaysSinceBirth) # Trasformo il valore dei giorni in postivo per facilitarne comprensione
+Oldest = max(Dataset_Train_reduced$DaysSinceBirth) # Il soggetto più anziano ha 25196 giorni (circa 69 anni)
+
+sum(Dataset_Train_reduced$DaysOfCurrentJob > 0) # 9040 valori sono positivi, questa è un'anomalia. Cerchiamo di capirne il perchè
+sum(is.na(Dataset_Train_reduced$DaysOfCurrentJob)) # 0 NA
+sum(Dataset_Train_reduced$DaysOfCurrentJob == 365243) # Dopo un'analisi dei valori, mi sono accorto che ai soggetti senza lavoro sono stati assegnati "DaysOfCurrentJob" = 365243. Cambio questo valore a NA per più facile comprensione
+Dataset_Train_reduced$DaysOfCurrentJob[Dataset_Train_reduced$DaysOfCurrentJob == 365243] = NA
+Dataset_Train_reduced$DaysOfCurrentJob = abs(Dataset_Train_reduced$DaysOfCurrentJob) # Trasformo il valore dei giorni in postivo per facilitarne comprensione
+sum(na.omit(Dataset_Train_reduced$DaysOfCurrentJob) >Oldest)
+
+
+sum(Dataset_Train_reduced$DaysSinceChangeRegistration > 0) # Tutti i valori sono negativi o nulli, come ci si aspetta
+Dataset_Train_reduced$DaysSinceChangeRegistration = abs(Dataset_Train_reduced$DaysSinceChangeRegistration) # Trasformo il valore dei giorni in postivo per facilitarne comprensione
+sum(Dataset_Train_reduced$DaysSinceChangeRegistration > Oldest) # I giorni sono coerenti con l'età del soggetto più anziano
+
+
+sum(Dataset_Train_reduced$DaysSinceIDChange > 0) # Tutti i valori sono negativi o nulli, come ci si aspetta
+Dataset_Train_reduced$DaysSinceIDChange = abs(Dataset_Train_reduced$DaysSinceIDChange) # Trasformo il valore dei giorni in postivo per facilitarne comprensione
+sum(Dataset_Train_reduced$DaysSinceIDChange > Oldest) # I giorni sono coerenti con l'età del soggetto più anziano
+```
+
+## Salvare il file creato in formato rds
+```{r}
+saveRDS(Dataset_Train_reduced, file = "ProcessedDataset.rds")
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
