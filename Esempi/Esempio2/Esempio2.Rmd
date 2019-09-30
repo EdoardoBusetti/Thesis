@@ -1,0 +1,57 @@
+---
+title: "Tesi laurea magistrale - Esempio 2"
+author: "Edoardo Busetti"
+date: "Dicembre, 2019"
+output:
+  html_document:
+    toc: true # table of content true
+    toc_depth: 3  # upto three depths of headings (specified by #, ## and ###)
+    number_sections: False  # if you want number sections at each table header
+  pdf_document: default
+---
+```{r}
+set.seed(1) # Per motivi di ripoducibilità
+
+nPoints = 120
+
+xData = sort(runif(nPoints)) # Definizione dei punti sulla asse delle ascisse
+WhiteNoise = rnorm(nPoints)  # White noise per aggiungere una componente di aleatorietà alle ordinate
+yData = sin( 1.4 * pi * xData) + 0.2*WhiteNoise # Definizione dei punti sulle ordinate 
+
+PerfectFit = sin( 1.4 * pi * xData) # Curva senza noise
+
+
+
+RegressioneLineare = lm(yData ~ xData)
+
+ColoreLinea = 2
+ColorePunti = rgb(red = 110, green = 200, blue = 110, alpha = 120, maxColorValue = 255)
+plot(xData,yData,
+  frame.plot = FALSE,
+  pch = 16,
+  col = ColorePunti)
+
+
+
+Overfitted = lm(yData ~ poly(xData, 25))
+
+
+
+xSeq <- seq(min(xData), max(xData), length = length(xData))            # Griglia di predizione
+ySeqDat <- predict.lm(Overfitted, newdata = list(x = xSeq))  # Valori predetti dal modello polinomiale
+
+
+
+
+
+abline(RegressioneLineare, lwd = 2, col = 2)        # Modello lineare (Underfitting)
+lines(x = xData, y = PerfectFit, col = 4, lwd = 2)  # La curva senza noise (Perfect Fit)
+lines(xSeq, ySeqDat, col = "black",lwd = 2)         # Curva polinomiale di 25esimo grado (Overfitting)
+
+
+legend("topright", cex =1, legend= c("Osservazioni","Underfitting","Fitting perfetto"),pch = c(16,NA,NA,NA), lty=c(NA,1,1,1), col=c(ColorePunti,ColoreLinea,4,"black"), horiz=T)
+
+```
+
+
+
