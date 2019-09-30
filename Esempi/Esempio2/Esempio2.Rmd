@@ -49,7 +49,7 @@ lines(x = xData, y = PerfectFit, col = 4, lwd = 2)  # La curva senza noise (Perf
 lines(xSeq, ySeqDat, col = "black",lwd = 2)         # Curva polinomiale di 25esimo grado (Overfitting)
 
 
-legend("topright", cex =1, legend= c("Osservazioni","Underfitting","Fitting perfetto"),pch = c(16,NA,NA,NA), lty=c(NA,1,1,1), col=c(ColorePunti,ColoreLinea,4,"black"), horiz=T)
+legend("topright", cex =1, legend= c("Osservazioni","Underfitting","Fitting perfetto","Overfitting"),pch = c(16,NA,NA,NA), lty=c(NA,1,1,1), col=c(ColorePunti,ColoreLinea,4,"black"), horiz=T)
 
 ```
 
