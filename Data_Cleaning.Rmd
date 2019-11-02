@@ -1,0 +1,243 @@
+---
+title: "Data Cleaning"
+author: "Edoardo Busetti"
+date: "Dicembre, 2019"
+output:
+  html_document:
+    toc: true # table of content true
+    toc_depth: 3  # upto three depths of headings (specified by #, ## and ###)
+    number_sections: False  # if you want number sections at each table header
+  pdf_document: default
+---
+# Data Cleaning
+
+In questo file importo i dati presi da https://www.kaggle.com/c/home-credit-default-risk/data e faccio data cleaning per preparare il dataset alla successiva analisi.
+
+```{r}
+library(dplyr)
+```
+## Pulisco l'ambiente di lavoro e importo il dataset
+```{r}
+rm(list = ls())
+Dataset_Train = read.csv("Raw_Dataset.csv",header = TRUE)
+```
+
+## Riduco il dataset mediante campionamento casuale.
+```{r}
+set.seed(1) # Assicura la riproducibilità dei risultati 
+Dataset_Train_reduced = Dataset_Train[sample(nrow(Dataset_Train), 4000), ]
+
+# Per utilizzo successivo per la correzione della distorsione del dataset
+Dataset_Train_reduced_Fix_Skew = Dataset_Train[sample(nrow(Dataset_Train), 45000), ] 
+Dataset_Train_reduced_Fix_Skew = Dataset_Train_reduced_Fix_Skew[(Dataset_Train_reduced_Fix_Skew$TARGET == 1),]
+Dataset_Train_reduced = rbind(Dataset_Train_reduced,Dataset_Train_reduced_Fix_Skew)
+```
+
+## Cambio i nomi delle *features* in modo che siano più chiari.
+```{r}
+# Rinomino le colonne:
+Dataset_Train_reduced =  rename(Dataset_Train_reduced,
+                                ClientID = SK_ID_CURR,
+                                TargetVariable = TARGET,
+                                ContractType = NAME_CONTRACT_TYPE,
+                                Gender = CODE_GENDER,
+                                OwnsCar = FLAG_OWN_CAR,
+                                OwnsHouse = FLAG_OWN_REALTY,
+                                NumChildren = CNT_CHILDREN,
+                                Income = AMT_INCOME_TOTAL,
+                                LoanAmmount = AMT_CREDIT,
+                                LoanAnnuity = AMT_ANNUITY,
+                                PriceOfItem = AMT_GOODS_PRICE,
+                                WhoWasAccompanying=NAME_TYPE_SUITE,
+                                IncomeType = NAME_INCOME_TYPE,
+                                HighestEducation = NAME_EDUCATION_TYPE,
+                                FamilyStatus = NAME_FAMILY_STATUS,
+                                HousingSituation = NAME_HOUSING_TYPE,
+                                NormalizedRegionPopulation = REGION_POPULATION_RELATIVE,
+                                DaysSinceBirth = DAYS_BIRTH,
+                                DaysOfCurrentJob = DAYS_EMPLOYED,
+                                DaysSinceChangeRegistration = DAYS_REGISTRATION,
+                                DaysSinceIDChange = DAYS_ID_PUBLISH,
+                                AgeOfCar = OWN_CAR_AGE,
+                                MobilePhone_Flag = FLAG_MOBIL,
+                                WorkPhone_Flag = FLAG_WORK_PHONE,
+                                HomePhone_Flag = FLAG_PHONE,
+                                MobilePhoneReachability_Flag = FLAG_CONT_MOBILE,
+                                Email_Flag = FLAG_EMAIL,
+                                OccupationType = OCCUPATION_TYPE,
+                                NumFamilyMembers = CNT_FAM_MEMBERS,
+                                RegionRating = REGION_RATING_CLIENT,
+                                CityRating = REGION_RATING_CLIENT_W_CITY,
+                                WeekdayOfApplication = WEEKDAY_APPR_PROCESS_START,
+                                HourOfApplication = HOUR_APPR_PROCESS_START,
+                                PermanentAddress_ContactAddress_Match_Region = REG_REGION_NOT_LIVE_REGION,
+                                PermanentAddress_WorkAddress_Match_Region = REG_REGION_NOT_WORK_REGION,
+                                ContactAddress_WorkAddress_Match_Region = LIVE_REGION_NOT_WORK_REGION,
+                                PermanentAddress_ContactAddress_Match_City = REG_CITY_NOT_LIVE_CITY,
+                                PermanentAddress_WorkAddress_Match_City = REG_CITY_NOT_WORK_CITY,
+                                ContactAddress_WorkAddress_Match_City = LIVE_CITY_NOT_WORK_CITY,
+                                WorkOrganizationType = ORGANIZATION_TYPE,
+                                Building_AptSize_Avg = APARTMENTS_AVG,
+                                Building_BasementSize_Average = BASEMENTAREA_AVG,
+                                Building_Age = YEARS_BUILD_AVG,
+                                Building_CommonArea_Average = COMMONAREA_AVG,
+                                Building_NumElev = ELEVATORS_AVG,
+                                Building_NumEntraces = ENTRANCES_AVG,
+                                Building_NumFloors = FLOORSMAX_AVG,
+                                Building_NumFloorsUnderground = FLOORSMIN_AVG,
+                                Building_LandArea = LANDAREA_AVG,
+                                Building_LivingApartments = LIVINGAPARTMENTS_AVG,
+                                Building_LivingArea = LIVINGAREA_AVG,
+                                Building_NonLivingApartments = NONLIVINGAPARTMENTS_AVG,
+                                Building_NonLivingArea = NONLIVINGAREA_AVG,
+                                ClientSocialCircle_Num30DaysDeafault = OBS_30_CNT_SOCIAL_CIRCLE,
+                                DaysSinceLastPhoneChange = DAYS_LAST_PHONE_CHANGE,
+                                NumEnquiriesCreditBureau_Hour = AMT_REQ_CREDIT_BUREAU_HOUR,
+                                NumEnquiriesCreditBureau_Day = AMT_REQ_CREDIT_BUREAU_DAY,
+                                NumEnquiriesCreditBureau_Week = AMT_REQ_CREDIT_BUREAU_WEEK,
+                                NumEnquiriesCreditBureau_Month = AMT_REQ_CREDIT_BUREAU_MON,
+                                NumEnquiriesCreditBureau_4Months = AMT_REQ_CREDIT_BUREAU_QRT,
+                                NumEnquiriesCreditBureau_Year = AMT_REQ_CREDIT_BUREAU_YEAR)
+```
+
+## Rimuovo le colonne superflue dal dataset
+```{r}
+# Questo processo è necessario in quanto, come già spiegato nella parte introduttiva della tesi, il computer mediante il quale effettuo l'analisi di questi dati non è in grado di processare una quantità così elevata di informazioni. 
+# Tuttavia per perseguire lo scopo della mia tesi il numero di colonne considerate è più che sufficiente.
+
+# Specifico le colonne che voglio rimuovere:
+ColumsToRemove = c("FLAG_EMP_PHONE","EXT_SOURCE_1","EXT_SOURCE_2"
+                  ,"EXT_SOURCE_3","YEARS_BEGINEXPLUATATION_AVG"
+                  ,"YEARS_BUILD_MODE","COMMONAREA_MODE"                             
+                  ,"ELEVATORS_MODE","ENTRANCES_MODE"                              
+                  ,"FLOORSMAX_MODE","FLOORSMIN_MODE"                              
+                  ,"LANDAREA_MODE","LIVINGAPARTMENTS_MODE"                       
+                  ,"LIVINGAREA_MODE","NONLIVINGAPARTMENTS_MODE"                    
+                  ,"NONLIVINGAREA_MODE","APARTMENTS_MEDI"                             
+                  ,"BASEMENTAREA_MEDI","YEARS_BEGINEXPLUATATION_MEDI"                
+                  ,"YEARS_BUILD_MEDI","COMMONAREA_MEDI"                             
+                  ,"ELEVATORS_MEDI","ENTRANCES_MEDI"                              
+                  ,"FLOORSMAX_MEDI","FLOORSMIN_MEDI"                              
+                  ,"LANDAREA_MEDI","LIVINGAPARTMENTS_MEDI"                       
+                  ,"LIVINGAREA_MEDI","NONLIVINGAPARTMENTS_MEDI"                    
+                  ,"NONLIVINGAREA_MEDI","FONDKAPREMONT_MODE"                          
+                  ,"HOUSETYPE_MODE","TOTALAREA_MODE"                              
+                  ,"WALLSMATERIAL_MODE","EMERGENCYSTATE_MODE"
+                  ,"APARTMENTS_MODE","BASEMENTAREA_MODE",
+                  "YEARS_BEGINEXPLUATATION_MODE")
+
+Dataset_Train_reduced[,ColumsToRemove] <- list(NULL) # Rimozione delle colonne elencate.
+```
+
+## Modifico la struttura del dataset
+Ora trasformerò alcune delle variabili da "int" a "factor", ovvero in variabili categoriche. Faccio questa trasformazione solo per quelle variabili che sono in effetti categoriche e non numeriche. In modo che R possa interpretarle in maniera corretta quando poi andrò a fare rappresentazioni grafiche e quando andrò a creare i modelli predittivi.
+
+```{r}
+str(Dataset_Train_reduced) # Controllo la struttura del dataset
+
+# Muto alcune variabili numeriche in categoriche / categoriche ordinate.
+Dataset_Train_reduced = mutate(Dataset_Train_reduced,ClientID = factor(ClientID),
+                               TargetVariable = factor(TargetVariable),
+                               MobilePhone_Flag = factor(MobilePhone_Flag),
+                               WorkPhone_Flag = factor(WorkPhone_Flag),
+                               MobilePhoneReachability_Flag = factor(MobilePhoneReachability_Flag),
+                               HomePhone_Flag = factor(HomePhone_Flag),
+                               Email_Flag = factor(Email_Flag),
+                               HourOfApplication = factor(HourOfApplication, ordered = TRUE),
+                               PermanentAddress_ContactAddress_Match_Region = factor(PermanentAddress_ContactAddress_Match_Region),
+                               PermanentAddress_WorkAddress_Match_Region = factor(PermanentAddress_WorkAddress_Match_Region),
+                               PermanentAddress_WorkAddress_Match_Region = factor(PermanentAddress_WorkAddress_Match_Region),
+                               ContactAddress_WorkAddress_Match_Region = factor(ContactAddress_WorkAddress_Match_Region),
+                               PermanentAddress_ContactAddress_Match_City = factor(PermanentAddress_ContactAddress_Match_City),
+                               PermanentAddress_WorkAddress_Match_City = factor(PermanentAddress_WorkAddress_Match_City),
+                               ContactAddress_WorkAddress_Match_City = factor(ContactAddress_WorkAddress_Match_City),
+                               FLAG_DOCUMENT_2 = factor(FLAG_DOCUMENT_2),
+                               FLAG_DOCUMENT_3 = factor(FLAG_DOCUMENT_3),
+                               FLAG_DOCUMENT_4 = factor(FLAG_DOCUMENT_4),
+                               FLAG_DOCUMENT_5 = factor(FLAG_DOCUMENT_5),
+                               FLAG_DOCUMENT_6 = factor(FLAG_DOCUMENT_6),
+                               FLAG_DOCUMENT_7 = factor(FLAG_DOCUMENT_7),
+                               FLAG_DOCUMENT_8 = factor(FLAG_DOCUMENT_8),
+                               FLAG_DOCUMENT_9 = factor(FLAG_DOCUMENT_9),
+                               FLAG_DOCUMENT_10 = factor(FLAG_DOCUMENT_10),
+                               FLAG_DOCUMENT_11 = factor(FLAG_DOCUMENT_11),
+                               FLAG_DOCUMENT_12 = factor(FLAG_DOCUMENT_12),
+                               FLAG_DOCUMENT_13 = factor(FLAG_DOCUMENT_13),
+                               FLAG_DOCUMENT_14 = factor(FLAG_DOCUMENT_14),
+                               FLAG_DOCUMENT_15 = factor(FLAG_DOCUMENT_15),
+                               FLAG_DOCUMENT_16 = factor(FLAG_DOCUMENT_16),
+                               FLAG_DOCUMENT_17 = factor(FLAG_DOCUMENT_17),
+                               FLAG_DOCUMENT_18 = factor(FLAG_DOCUMENT_18),
+                               FLAG_DOCUMENT_19 = factor(FLAG_DOCUMENT_19),
+                               FLAG_DOCUMENT_20 = factor(FLAG_DOCUMENT_20),
+                               FLAG_DOCUMENT_21 = factor(FLAG_DOCUMENT_21),
+                               NumFamilyMembers = as.integer(NumFamilyMembers),
+                               DaysSinceChangeRegistration = as.integer(DaysSinceChangeRegistration),
+                               AgeOfCar = as.integer(AgeOfCar)
+                               )
+```
+
+## Controllo la coerenza dei valori
+Nel controllare i dati importati mi sono accorto che alcuni valori erano errati. Infatti nel dataset c'erano soggetti che risultavano avere il valoro da circa 1000 anni. Questo è dovuto ad un probabile errore di segnalazione del dato.
+Mi limito a sostituire questo valore con un NA per le osservazioni anomale e successivamente nel file di *data analysis* farò un investigazione più approfondita su queste osservazioni.
+```{r}
+sum(Dataset_Train_reduced$DaysSinceBirth >= 0) # Tutti i valori sono negativi
+sum(Dataset_Train_reduced$DaysSinceBirth >= -6570) # Tutti i clienti hanno almeno 18 anni (365*18 giorni)
+sum(Dataset_Train_reduced$DaysSinceBirth < -36500) # Tutti i clienti hanno meno di 100 anni
+Dataset_Train_reduced$DaysSinceBirth = abs(Dataset_Train_reduced$DaysSinceBirth) # Trasformo il valore dei giorni in postivo per facilitarne comprensione
+Oldest = max(Dataset_Train_reduced$DaysSinceBirth) # Il soggetto più anziano ha 25196 giorni (circa 69 anni)
+
+sum(Dataset_Train_reduced$DaysOfCurrentJob > 0) # 9040 valori sono positivi, questa è un'anomalia. Cerchiamo di capirne il perchè
+sum(is.na(Dataset_Train_reduced$DaysOfCurrentJob)) # 0 NA
+sum(Dataset_Train_reduced$DaysOfCurrentJob == 365243) # Dopo un'analisi dei valori, mi sono accorto che alcuni soggetti avevano "DaysOfCurrentJob" = 365243, questo è evidentemente un' anomalia, dato che questo valore corrisponde a circa 1000 anni. Cambio questo valore a NA per più facile comprensione e successivamente nell'analisi dei dati cercherò di capire la fonte di questo errore.
+Dataset_Train_reduced$DaysOfCurrentJob[Dataset_Train_reduced$DaysOfCurrentJob == 365243] = NA
+Dataset_Train_reduced$DaysOfCurrentJob = abs(Dataset_Train_reduced$DaysOfCurrentJob) # Trasformo il valore dei giorni in postivo per facilitarne comprensione
+sum(na.omit(Dataset_Train_reduced$DaysOfCurrentJob) >Oldest)
+
+
+sum(Dataset_Train_reduced$DaysSinceChangeRegistration > 0) # Tutti i valori sono negativi o nulli, come ci si aspetta
+Dataset_Train_reduced$DaysSinceChangeRegistration = abs(Dataset_Train_reduced$DaysSinceChangeRegistration) # Trasformo il valore dei giorni in postivo per facilitarne comprensione
+sum(Dataset_Train_reduced$DaysSinceChangeRegistration > Oldest) # I giorni sono coerenti con l'età del soggetto più anziano
+
+
+sum(Dataset_Train_reduced$DaysSinceIDChange > 0) # Tutti i valori sono negativi o nulli, come ci si aspetta
+Dataset_Train_reduced$DaysSinceIDChange = abs(Dataset_Train_reduced$DaysSinceIDChange) # Trasformo il valore dei giorni in postivo per facilitarne comprensione
+sum(Dataset_Train_reduced$DaysSinceIDChange > Oldest) # I giorni sono coerenti con l'età del soggetto più anziano
+```
+
+
+```{r}
+# rimuovo alcune colonne per alleggerire il carico di lavoro nei successivi modelli
+names_Dataset_Train_reduced = names(Dataset_Train_reduced)
+names_Dataset_Train_reduced = names_Dataset_Train_reduced[1:41]
+
+Dataset_Train_reduced = Dataset_Train_reduced[,names_Dataset_Train_reduced]
+Dataset_Train_reduced$DaysSinceIDChange = NULL
+Dataset_Train_reduced$MobilePhoneReachability_Flag = NULL
+Dataset_Train_reduced$HourOfApplication = NULL
+Dataset_Train_reduced$HomePhone_Flag = NULL
+Dataset_Train_reduced$Email_Flag = NULL
+Dataset_Train_reduced$DaysSinceChangeRegistration = NULL
+Dataset_Train_reduced$WhoWasAccompanying = NULL
+Dataset_Train_reduced$NormalizedRegionPopulation = NULL
+Dataset_Train_reduced$WorkPhone_Flag = NULL
+Dataset_Train_reduced$PermanentAddress_ContactAddress_Match_Region = NULL
+Dataset_Train_reduced$PermanentAddress_WorkAddress_Match_Region = NULL
+Dataset_Train_reduced$ContactAddress_WorkAddress_Match_Region = NULL
+Dataset_Train_reduced$PermanentAddress_ContactAddress_Match_City = NULL
+Dataset_Train_reduced$PermanentAddress_WorkAddress_Match_City = NULL
+Dataset_Train_reduced$ContactAddress_WorkAddress_Match_City = NULL
+Dataset_Train_reduced$MobilePhone_Flag = NULL
+
+```
+
+
+## Salvo i dataset creati in formato .rds per futuro utilizzo nel workbook di *data analysis*
+```{r}
+Dataset_Train_reduced_Fix_Skew = Dataset_Train_reduced[4001:nrow(Dataset_Train_reduced),]
+Dataset_Train_reduced = Dataset_Train_reduced[1:4000,]
+
+
+saveRDS(Dataset_Train_reduced, file = "ProcessedDataset.rds")
+saveRDS(Dataset_Train_reduced_Fix_Skew, file = "FixSkew.rds")
+```
